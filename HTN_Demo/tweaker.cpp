@@ -111,7 +111,7 @@ void Tweaker::update() {
 
             if (pos == std::string::npos) {
                 break;
-            }
+            } 
 
             pos = str.find('(', pos);
 
