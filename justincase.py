@@ -2,6 +2,8 @@ import math
 import os
 import arcade
 
+import pytiled_parser
+
 
 # Constants
 SCREEN_WIDTH = 1000
@@ -16,7 +18,7 @@ SPRITE_PIXEL_SIZE = 128
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
 
 # Shooting Constants
-SPRITE_SCALING_LASER = 1.25
+SPRITE_SCALING_LASER = 0.8
 SHOOT_SPEED = 15
 BULLET_SPEED = 12
 BULLET_DAMAGE = 25
@@ -25,6 +27,9 @@ BULLET_DAMAGE = 25
 PLAYER_MOVEMENT_SPEED = 7
 GRAVITY = 1.5
 PLAYER_JUMP_SPEED = 30
+
+PLAYER_START_X = 2
+PLAYER_START_Y = 1
 
 # How many pixels to keep as a minimum margin between the character
 # and the edge of the screen.
@@ -47,8 +52,6 @@ LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_LADDERS = "Ladders"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_ENEMIES = "Enemies"
-LAYER_NAME_BULLETS = "Bullets"
-
 
 def load_texture_pair(filename):
     return [
@@ -67,6 +70,7 @@ class Entity(arcade.Sprite):
         # Used for image sequences
         self.cur_texture = 0
         self.scale = CHARACTER_SCALING
+        # self.character_face_direction = RIGHT_FACING
 
         main_path = f":resources:images/animated_characters/{name_folder}/{name_file}"
 
@@ -76,21 +80,19 @@ class Entity(arcade.Sprite):
 
         # Load textures for walking
         self.walk_textures = []
-        self.walk_ch_textures =[];
         for i in range(8):
-            texture = load_texture_pair("Sprites/_walk.png")
-            self.walk_ch_textures.append(texture)
+            """ texture = load_texture_pair("Sprites/_walk.png")
+            self.walk_textures.append(texture)
             texture = load_texture_pair("Sprites/_idle.png")
-            self.walk_ch_textures.append(texture)
-            # Enemies
+            self.walk_textures.append(texture) """
             texture = load_texture_pair(f"{main_path}_walk{i}.png")
             self.walk_textures.append(texture)
 
         # Load textures for climbing
         self.climbing_textures = []
-        texture = arcade.load_texture("Sprites/_climb0.png")
+        texture = arcade.load_texture(f"{main_path}_climb0.png")
         self.climbing_textures.append(texture)
-        texture = arcade.load_texture("Sprites/_climb1.png")
+        texture = arcade.load_texture(f"{main_path}_climb1.png")
         self.climbing_textures.append(texture)
 
         # Set the initial texture
@@ -100,6 +102,7 @@ class Entity(arcade.Sprite):
         # a different hit box, you can do it like the code below.
         # self.set_hit_box([[-22, -64], [22, -64], [22, 28], [-22, 28]])
         self.set_hit_box(self.texture.hit_box_points)
+        # self.hit_box = self.texture.hit_box_points
 
 
 class Enemy(Entity):
@@ -203,7 +206,7 @@ class PlayerCharacter(Entity):
         self.cur_texture += 1
         if self.cur_texture > 7:
             self.cur_texture = 0
-        self.texture = self.walk_ch_textures[self.cur_texture][self.facing_direction]
+        self.texture = self.walk_textures[self.cur_texture][self.facing_direction]
 
 
 class MyGame(arcade.Window):
@@ -266,8 +269,7 @@ class MyGame(arcade.Window):
         self.gui_camera = arcade.Camera(self.width, self.height)
 
         # Map name
-        map_name = f":resources:tiled_maps/map_with_ladders.json"
-        # map_name ="Source/SpaceJam_Map.json"
+        map_name ="Source/SpaceJam_Map.json"
 
         # Layer Specific Options for the Tilemap
         layer_options = {
@@ -330,12 +332,14 @@ class MyGame(arcade.Window):
             enemy.center_y = math.floor(
                 (cartesian[1] + 1) * (self.tile_map.tile_height * TILE_SCALING)
             )
+
             if "boundary_left" in my_object.properties:
                 enemy.boundary_left = my_object.properties["boundary_left"]
             if "boundary_right" in my_object.properties:
                 enemy.boundary_right = my_object.properties["boundary_right"]
             if "change_x" in my_object.properties:
                 enemy.change_x = my_object.properties["change_x"]
+
             self.scene.add_sprite(LAYER_NAME_ENEMIES, enemy)
 
         # Add bullet spritelist to Scene
@@ -493,7 +497,7 @@ class MyGame(arcade.Window):
             if self.shoot_pressed:
                 arcade.play_sound(self.shoot_sound)
                 bullet = arcade.Sprite(
-                    "Sprites/_ball.png",
+                    ":resources:images/space_shooter/laserBlue01.png",
                     SPRITE_SCALING_LASER,
                 )
 
