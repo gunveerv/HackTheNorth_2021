@@ -1,11 +1,17 @@
+"""
+Platformer Game
+
+python -m arcade.examples.platform_tutorial.11_animate_character
+"""
 import math
 import os
+
 import arcade
 
 # Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
-SCREEN_TITLE = "Space Jam Battle"
+SCREEN_TITLE = "Platformer"
 
 # Constants used to scale our sprites from their original size
 TILE_SCALING = 0.5
@@ -72,17 +78,13 @@ class Entity(arcade.Sprite):
 
         main_path = f":resources:images/animated_characters/{name_folder}/{name_file}"
 
-        self.idle_texture_pair = load_texture_pair("Sprites/_idle.png")
-        self.jump_texture_pair = load_texture_pair("Sprites/_jump.png")
+        self.idle_texture_pair = load_texture_pair(f"{main_path}_idle.png")
+        self.jump_texture_pair = load_texture_pair(f"{main_path}_jump.png")
         self.fall_texture_pair = load_texture_pair(f"{main_path}_fall.png")
 
         # Load textures for walking
         self.walk_textures = []
         for i in range(8):
-            """ texture = load_texture_pair("Sprites/_walk.png")
-            self.walk_textures.append(texture)
-            texture = load_texture_pair("Sprites/_idle.png")
-            self.walk_textures.append(texture) """
             texture = load_texture_pair(f"{main_path}_walk{i}.png")
             self.walk_textures.append(texture)
 
